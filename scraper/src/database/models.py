@@ -77,10 +77,5 @@ class AdPlatform(Base):
     # Relationship
     ad = relationship("Ad", back_populates="platforms")
 
-    # Unique constraint: one ad can only have one entry per platform
-    __table_args__ = (
-        {"sqlite_autoincrement": True} if "sqlite" in str(Base.metadata.bind.url) else {}
-    )
-
     def __repr__(self):
         return f"<AdPlatform(ad_id='{self.ad_id}', platform='{self.platform}')>"
