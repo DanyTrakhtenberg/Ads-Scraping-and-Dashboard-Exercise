@@ -55,7 +55,9 @@ def import_ads_from_json(json_file_path: str):
                 
                 if existing_ad:
                     # Update existing ad
-                    existing_ad.status = AdStatus(ad_data["status"])
+                    # Convert status to uppercase to match enum values
+                    status_value = ad_data["status"].upper() if isinstance(ad_data["status"], str) else ad_data["status"]
+                    existing_ad.status = AdStatus(status_value)
                     existing_ad.start_date = parse_date(ad_data["start_date"])
                     existing_ad.end_date = parse_date(ad_data.get("end_date"))
                     existing_ad.page_name = ad_data.get("page_name")
@@ -70,9 +72,11 @@ def import_ads_from_json(json_file_path: str):
                     updated_count += 1
                 else:
                     # Create new ad
+                    # Convert status to uppercase to match enum values
+                    status_value = ad_data["status"].upper() if isinstance(ad_data["status"], str) else ad_data["status"]
                     ad = Ad(
                         ad_id=ad_data["ad_id"],
-                        status=AdStatus(ad_data["status"]),
+                        status=AdStatus(status_value),
                         start_date=parse_date(ad_data["start_date"]),
                         end_date=parse_date(ad_data.get("end_date")),
                         page_name=ad_data.get("page_name"),
@@ -118,16 +122,16 @@ def import_ads_from_json(json_file_path: str):
                     db.add(version)
                 
                 db.commit()
-                print(f"✓ Imported ad {ad.ad_id} ({len(versions)} versions, {len(platforms)} platforms)")
+                print(f"[OK] Imported ad {ad.ad_id} ({len(versions)} versions, {len(platforms)} platforms)")
                 
             except IntegrityError as e:
                 db.rollback()
                 error_count += 1
-                print(f"✗ Error importing ad {ad_data.get('ad_id', 'unknown')}: {e}")
+                print(f"[ERROR] Error importing ad {ad_data.get('ad_id', 'unknown')}: {e}")
             except Exception as e:
                 db.rollback()
                 error_count += 1
-                print(f"✗ Error importing ad {ad_data.get('ad_id', 'unknown')}: {e}")
+                print(f"[ERROR] Error importing ad {ad_data.get('ad_id', 'unknown')}: {e}")
         
         print(f"\n{'='*60}")
         print(f"Import Summary:")

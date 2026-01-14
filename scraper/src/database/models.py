@@ -8,8 +8,8 @@ import enum
 
 
 class AdStatus(enum.Enum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
 
 
 class AssetType(enum.Enum):
