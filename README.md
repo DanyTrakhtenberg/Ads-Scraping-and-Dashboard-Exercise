@@ -472,9 +472,77 @@ Open browser: `http://localhost:5173` (local) or `http://localhost` (Docker)
 
 ---
 
+---
+
+## Troubleshooting
+
+### Database Connection Issues
+
+**Problem**: Backend shows "relation does not exist" errors
+- **Solution**: Initialize the database schema first:
+  ```powershell
+  cd scraper\src
+  $env:DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/ads_db"
+  ..\venv\Scripts\python.exe -c "from database.connection import init_db; init_db()"
+  ```
+
+**Problem**: Enum mismatch errors (ACTIVE/INACTIVE)
+- **Solution**: Ensure Python models use uppercase enum values. The import script handles conversion automatically.
+
+### Docker Issues
+
+**Problem**: Containers won't start
+- **Solution**: Check if ports are already in use:
+  ```powershell
+  # Check port 5432 (PostgreSQL)
+  netstat -ano | findstr :5432
+  
+  # Check port 3000 (Backend)
+  netstat -ano | findstr :3000
+  
+  # Check port 80 (Frontend)
+  netstat -ano | findstr :80
+  ```
+
+**Problem**: Frontend can't connect to backend
+- **Solution**: 
+  1. Ensure backend is running: `docker ps` or check `http://localhost:3000/health`
+  2. Check `CORS_ORIGIN` in backend `.env` matches frontend URL
+  3. For Docker, ensure both services are on the same network
+
+### Import Issues
+
+**Problem**: Unicode encoding errors during import
+- **Solution**: Set `PYTHONIOENCODING=utf-8`:
+  ```powershell
+  $env:PYTHONIOENCODING = "utf-8"
+  py database\import_ads.py scraped_ads.json
+  ```
+
+**Problem**: Import fails with "enum value does not exist"
+- **Solution**: Drop and recreate tables with correct enum:
+  ```powershell
+  docker exec ads-postgres psql -U postgres -d ads_db -c "DROP TYPE IF EXISTS adstatus CASCADE;"
+  # Then re-run init_db() and import
+  ```
+
+---
+
+## Environment Variables
+
+Each component requires a `.env` file. See `.env.example` files in each directory:
+- `backend/.env.example` - Backend configuration
+- `frontend/.env.example` - Frontend configuration  
+- `scraper/.env.example` - Scraper/database configuration
+
+**Important**: Copy `.env.example` to `.env` and update values as needed.
+
+---
+
 ## Notes
 
 - The scraper captures the first 50 ads by default
 - Each ad can have multiple versions (stored in `versions` array)
 - All ad assets (images/videos) are stored as URLs (not downloaded)
 - Database uses PostgreSQL (via Docker) or SQLite (default if no Docker)
+- Enum values must be uppercase (`ACTIVE`, `INACTIVE`) to match database schema
