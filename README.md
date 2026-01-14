@@ -245,11 +245,230 @@ Connection details:
 
 ---
 
-## Part 2: Dashboard (Coming Soon)
+## Part 2: Dashboard
 
-- Backend: Node.js API
-- Frontend: React dashboard
-- Features: Visualizations, filters, ad display
+### Overview
+
+The dashboard consists of:
+- **Backend**: Node.js + Express.js + TypeScript API (RESTful)
+- **Frontend**: React + TypeScript + Vite dashboard
+
+### Architecture
+
+The backend follows a **decoupled architecture pattern**:
+- Repository Pattern for database abstraction
+- Service Layer for business logic
+- Dependency Injection for flexibility
+- Easy to switch database implementations
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL (via Docker - already set up in Part 1)
+- Backend and Frontend can run locally or via Docker
+
+---
+
+## Backend Setup
+
+### Local Development
+
+1. **Navigate to backend directory:**
+   ```powershell
+   cd backend
+   ```
+
+2. **Install dependencies:**
+   ```powershell
+   npm install
+   ```
+
+3. **Create `.env` file:**
+   ```env
+   PORT=3000
+   NODE_ENV=development
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ads_db
+   CORS_ORIGIN=http://localhost:5173
+   ```
+
+4. **Start PostgreSQL (if not running):**
+   ```powershell
+   # From project root
+   docker-compose up -d postgres
+   ```
+
+5. **Run backend in development mode:**
+   ```powershell
+   npm run dev
+   ```
+
+   Backend will be available at: `http://localhost:3000`
+
+6. **Test API:**
+   ```powershell
+   # Health check
+   curl http://localhost:3000/health
+
+   # Get ads
+   curl http://localhost:3000/api/ads?page=1&limit=10
+   ```
+
+### API Endpoints
+
+- `GET /api/ads` - Get paginated ads (with filters: `status`, `platform`, `startDate`, `endDate`, `pageName`)
+- `GET /api/ads/:id` - Get ad by ID
+- `GET /api/ads/stats` - Get aggregated statistics
+- `GET /api/ads/stats/by-date` - Get ads grouped by date
+- `GET /api/ads/stats/platforms` - Get platform statistics
+- `GET /health` - Health check
+
+See `backend/README.md` for detailed API documentation.
+
+---
+
+## Frontend Setup
+
+### Local Development
+
+1. **Navigate to frontend directory:**
+   ```powershell
+   cd frontend
+   ```
+
+2. **Install dependencies:**
+   ```powershell
+   npm install
+   ```
+
+3. **Create `.env` file (optional):**
+   ```env
+   VITE_API_URL=http://localhost:3000/api
+   ```
+   
+   Default is `http://localhost:3000/api` if not specified.
+
+4. **Make sure backend is running** (see Backend Setup above)
+
+5. **Run frontend development server:**
+   ```powershell
+   npm run dev
+   ```
+
+   Frontend will be available at: `http://localhost:5173`
+
+### Dashboard Features
+
+- **Statistics Cards**: Total, Active, and Inactive ad counts
+- **Charts**: 
+  - Ads over time (line chart)
+  - Platform distribution (bar chart)
+- **Filters**: Status, Platform, Date Range, Page Name
+- **Ad List**: Paginated list with images
+- **Ad Detail**: Full ad information with all versions
+
+See `frontend/README.md` for detailed frontend documentation.
+
+---
+
+## Docker Setup (Full Stack)
+
+Run everything with Docker Compose:
+
+### Start All Services
+
+```powershell
+# From project root
+docker-compose up -d
+```
+
+This starts:
+- PostgreSQL (port 5432)
+- Backend API (port 3000)
+- Frontend (port 80)
+
+### Access Services
+
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost:3000/api
+- **PostgreSQL**: localhost:5432
+
+### View Logs
+
+```powershell
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+```
+
+### Stop Services
+
+```powershell
+docker-compose down
+```
+
+### Rebuild After Changes
+
+```powershell
+docker-compose up -d --build
+```
+
+---
+
+## Complete Workflow
+
+### 1. Setup Database
+
+```powershell
+# Start PostgreSQL
+cd scraper
+docker-compose up -d
+```
+
+### 2. Scrape Ads
+
+```powershell
+cd scraper\src
+venv\Scripts\Activate.ps1
+py scrape_graphql.py
+```
+
+### 3. Import to Database
+
+```powershell
+py database\import_ads.py scraped_ads.json
+```
+
+### 4. Start Backend
+
+```powershell
+# Option A: Local development
+cd backend
+npm install
+npm run dev
+
+# Option B: Docker
+docker-compose up -d backend
+```
+
+### 5. Start Frontend
+
+```powershell
+# Option A: Local development
+cd frontend
+npm install
+npm run dev
+
+# Option B: Docker
+docker-compose up -d frontend
+```
+
+### 6. View Dashboard
+
+Open browser: `http://localhost:5173` (local) or `http://localhost` (Docker)
 
 ---
 
