@@ -31,10 +31,23 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ads_db
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: http://localhost
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - ads-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ads-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - ads-network
     restart: unless-stopped

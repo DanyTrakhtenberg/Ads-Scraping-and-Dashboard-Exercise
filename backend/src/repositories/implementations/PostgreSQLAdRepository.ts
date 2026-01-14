@@ -183,26 +183,39 @@ export class PostgreSQLAdRepository implements IAdRepository {
     let paramIndex = 1;
 
     if (filters?.status) {
-      whereConditions.push(`status = $${paramIndex}`);
+      whereConditions.push(`a.status = $${paramIndex}`);
       queryParams.push(filters.status);
       paramIndex++;
     }
 
     if (filters?.startDate) {
-      whereConditions.push(`start_date >= $${paramIndex}`);
+      whereConditions.push(`a.start_date >= $${paramIndex}`);
       queryParams.push(filters.startDate);
       paramIndex++;
     }
 
     if (filters?.endDate) {
-      whereConditions.push(`end_date <= $${paramIndex}`);
+      whereConditions.push(`a.end_date <= $${paramIndex}`);
       queryParams.push(filters.endDate);
+      paramIndex++;
+    }
+
+    if (filters?.pageName) {
+      whereConditions.push(`a.page_name ILIKE $${paramIndex}`);
+      queryParams.push(`%${filters.pageName}%`);
       paramIndex++;
     }
 
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
-    const query = `SELECT COUNT(*) as total FROM ads ${whereClause}`;
+    // Platform filter requires a JOIN
+    let platformJoin = "";
+    if (filters?.platform) {
+      platformJoin = `INNER JOIN ad_platforms ap ON a.id = ap.ad_id AND ap.platform = $${paramIndex}`;
+      queryParams.push(filters.platform);
+    }
+
+    const query = `SELECT COUNT(DISTINCT a.id) as total FROM ads a ${platformJoin} ${whereClause}`;
     const result = await this.db.queryOne<{ total: string }>(query, queryParams);
     return parseInt(result?.total || "0", 10);
   }
