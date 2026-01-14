@@ -1,6 +1,9 @@
 # API Endpoint Test Results
 
 ## Test Date: 2026-01-14
+## Status: ✅ All Issues Resolved (2026-01-14)
+
+> **Note**: This document was created during initial development. All enum mismatch issues have been fixed. All endpoints are now working correctly.
 
 ## ✅ Working Endpoints
 
@@ -50,23 +53,20 @@
   - **Messenger**: 7 ads
   - Total platforms: 4
 
-## ⚠️ Endpoints with Issues
+## ✅ All Endpoints Working
 
 ### 4. `GET /api/ads/stats`
-- **Status**: ❌ Error (500 Internal Server Error)
-- **Error**: `invalid input value for enum adstatus: "inactive"`
-- **Issue**: Database enum uses uppercase (`ACTIVE`, `INACTIVE`), but backend sends lowercase
-- **Root Cause**: TypeScript enum uses lowercase, database enum uses uppercase
+- **Status**: ✅ Fixed - Now working correctly
+- **Response**: Returns total, active, inactive counts, byDate, and byPlatform stats
+- **Fix Applied**: Updated `count()` method to handle platform filters correctly
 
 ### 5. `GET /api/ads/stats/by-date`
-- **Status**: ❌ Error (500 Internal Server Error)
-- **Error**: `invalid input value for enum adstatus: "active"`
-- **Issue**: Same enum case mismatch
+- **Status**: ✅ Fixed - Now working correctly
+- **Response**: Returns ads grouped by date with active/inactive counts
 
-### 6. `GET /api/ads?status=active`
-- **Status**: ❌ Error (500 Internal Server Error)
-- **Error**: `invalid input value for enum adstatus: "active"`
-- **Issue**: Same enum case mismatch
+### 6. `GET /api/ads?status=ACTIVE` or `?status=INACTIVE`
+- **Status**: ✅ Fixed - Now working correctly
+- **Note**: Status values must be uppercase (`ACTIVE`, `INACTIVE`)
 
 ## Database Enum Values
 
@@ -76,13 +76,14 @@ The PostgreSQL database enum `adstatus` uses **UPPERCASE** values:
 
 ## Summary
 
-- **Working**: 3 endpoints (health, ads list, platform stats)
-- **Needs Fix**: 3 endpoints (stats, by-date, status filter)
-- **Issue**: Enum case mismatch (lowercase in TypeScript vs uppercase in database)
-- **Solution**: Update backend to use uppercase enum values or convert values when querying
+- **All endpoints**: ✅ Working correctly
+- **Enum values**: Fixed - Backend and database now use uppercase (`ACTIVE`, `INACTIVE`)
+- **Platform filter**: Fixed - Stats endpoint now correctly filters by platform
 
-## Next Steps
+## Fixes Applied
 
-1. Update TypeScript `AdStatus` enum to use uppercase values
-2. Update repository queries to use uppercase enum values
-3. Re-test all endpoints
+1. ✅ Updated TypeScript `AdStatus` enum to use uppercase values
+2. ✅ Updated repository queries to use uppercase enum values  
+3. ✅ Fixed `count()` method to handle platform filters
+4. ✅ Updated Python scraper models to use uppercase enum values
+5. ✅ Updated import script to convert lowercase JSON values to uppercase
